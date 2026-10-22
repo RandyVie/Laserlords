@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Laser Lords
+Comment=Laser Lords (CD-i) native runner
+Exec=laserlords %f
+Icon=icon_1024
+Categories=Game;
+Terminal=false

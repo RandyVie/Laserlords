@@ -1,0 +1,14 @@
+data/
+ext/
+out/
+traces/
+build/
+build-*/
+.venv/
+nvram/
+*.chd
+*.bin
+*.cue
+*.log
+.git/
+CDi Bios

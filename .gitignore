@@ -1,0 +1,23 @@
+# Game data: never commit
+*.chd
+*.bin
+*.cue
+data/
+ext/
+audio/
+out/
+traces/
+# Build / env
+build/
+build-*/
+.venv/
+__pycache__/
+.DS_Store
+nvram/
+dist/
+# CD-i system ROMs: never commit
+CDi Bios/
+*.rom
+# Logs and session recordings
+*.log
+*.llrec
