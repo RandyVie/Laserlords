@@ -63,7 +63,15 @@ int soundmap_setstt(int sub)
         audio_stop_effect();               /* the effect it replaces reports done to its own status word */
         m->status = REG(A0);
         if (m->status) wr16(m->status, 0);
-        ll_log("        soundmap: play %d groups %d..%d x%d (%d frames at %d Hz)\n", (int)(m - maps) + 1, first, last, reps, frames, rate);
+        int valid = 0;   /* sound group headers repeat their parameters: 0-3 = 4-7, 8-11 = 12-15 */
+        for (int g = first; g <= last; g++) {
+            uint32_t h = base + (uint32_t)g * 128;
+            if (rd32(h) == rd32(h + 4) && rd32(h + 8) == rd32(h + 12)) valid++;
+        }
+        double dsum = 0, asum = 0;   /* roughness: mean step / mean level (noise is high) */
+        for (int k = 1; k < frames; k++) { dsum += abs(pcm[2 * k] - pcm[2 * k - 2]); asum += abs(pcm[2 * k]); }
+        ll_log("        soundmap: play %d groups %d..%d x%d (%d frames at %d Hz) level %.0f roughness %.2f, %d/%d groups valid\n", (int)(m - maps) + 1,
+               first, last, reps, frames, rate, frames ? asum / frames : 0, asum > 0 ? dsum / asum : 0, valid, n);
         audio_play_effect(pcm, frames, rate, effect_done, m);
         free(pcm);
         return 0;

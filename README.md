@@ -23,7 +23,7 @@ build/laserlords "Laser Lords (Europe).chd"
 | Skip a cutscene | left click | Space | A |
 | Show the controls | | F1 | |
 | Scaling (sharp / nearest / linear) | | F2 | |
-| Top border on / off | | F3 | |
+| Borders on / off | | F3 | |
 | Slow the planets down (100% / 70% / 50%) | | F4 | |
 | Quit | | Cmd+Q / Ctrl+Q | |
 
@@ -46,7 +46,7 @@ There is no arrow cursor, as on the original: on the orbit screen the blinking w
 
 **Cosmetic fixes (on by default):**
 - During warp crossfades the game's own display program shows ~1-5 s of colour noise where the cockpit panel was. The runner hides it, showing the space image there instead (`fix_crossfade=0` in `settings.txt` turns this off).
-- On PAL the game leaves the top 40 lines black (its pictures are 240 lines, placed at lines 40-279). The runner crops them, except during the opening logo, so the picture fills a 14:9 window. F3 or `crop_top=0` shows them.
+- The game's pictures are 240 lines (rows 20-259 of the 280-line field); the black bands above and below are cropped (the opening logo keeps the top band), so the picture fills a 14:9 window. F3 or `crop_top=0` shows the whole field.
 
 To see the game exactly as it draws itself, run with `--accurate`.
 

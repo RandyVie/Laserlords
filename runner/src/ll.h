@@ -90,6 +90,8 @@ bool os9_process_alive(const char *name);
 void os9_charge(int cycles);
 extern int ll_ucm_base, ll_ucm_entry;
 void cdfm_skip(void);
+bool cdfm_skippable(void);
+uint64_t os9_cycles(void);
 void cdfm_reset(void);
 void os9_vblank_signal(int sig);                 /* 0 disarms */
 void os9_skip_module(const char *name);          /* debug: fork of NAME exits at once */

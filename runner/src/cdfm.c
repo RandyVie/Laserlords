@@ -38,6 +38,7 @@ typedef struct {
     Adpcm    adpcm;         /* decoder state for real-time audio */
     uint32_t audio_sectors, last_masks, skipped;
     uint32_t fill[3][32];   /* sectors written into the current PCL */
+    uint64_t started;       /* emulated cycles at SS_Play */
 } Play;
 
 static Play plays[4];
@@ -66,6 +67,7 @@ int cdfm_play(int pid, uint32_t pcb, uint32_t lbn, uint32_t nsec)
     if (!p) return E_MEMFUL;
     memset(p, 0, sizeof *p);
     p->active = true; p->pid = pid; p->pcb = pcb; p->lbn = lbn; p->end = lbn + nsec;
+    p->started = os9_cycles();
     p->last_masks = rd32(pcb + 8) ^ (uint32_t)rd16(pcb + 0x0C) << 8;
     wr16(pcb, 0);
     ll_log("        cdfm: play LBN %u..%u chan %08x achan %04x records %d signal %d\n", lbn, lbn + nsec,
@@ -86,10 +88,18 @@ void cdfm_abort(int pid)
  * game offers no way to skip (see input.c). */
 static void complete(Play *p, int kind, int ch, uint32_t table, uint32_t pcl);
 
+/* Plays younger than this are never skipped: the title starts with a fade-in during which
+ * cdi_space doesn't read the pointer, and ending its play then left the game waiting forever. */
+#define SKIP_MIN_SECONDS 3
+
+static bool skippable(const Play *p) { return p->active && os9_cycles() - p->started >= SKIP_MIN_SECONDS * ll_cpu_hz; }
+
+bool cdfm_skippable(void) { for (int i = 0; i < 4; i++) if (skippable(&plays[i])) return true; return false; }
+
 void cdfm_skip(void)
 {
     for (int i = 0; i < 4; i++)
-        if (plays[i].active) {
+        if (skippable(&plays[i])) {
             Play *p = &plays[i];
             ll_log("        cdfm: play of process %d skipped by the user\n", p->pid);
             for (int k = 0; k < 3; k++)        /* hand over half-filled PCLs, as at a record end */
@@ -133,6 +143,11 @@ static void deliver(Play *p, int kind, int ch, const uint8_t *data, int len, con
         wr8(pcl, 0);
         wr32(pcl + 0x18, 0);
     }
+    /* Audio sectors go to memory as their 18 sound groups (2304 bytes), without the 20 spare
+     * bytes: the games index sound groups linearly across sectors (sound maps play e.g. groups
+     * 882-917 of a 56-sector buffer). With the spare bytes every group after the first sector was
+     * shifted and the effects decoded as noise. */
+    if (kind == 1 && len > 2304) len = 2304;
     uint32_t cnt = p->fill[kind][ch], size = rd32(pcl + 0x0E), buf = rd32(pcl + 0x0A);
     if (buf) for (int i = 0; i < len; i++) wr8(buf + cnt * (uint32_t)len + i, data[i]);
     wr8(pcl + 1, sub[2]);

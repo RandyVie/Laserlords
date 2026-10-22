@@ -47,7 +47,7 @@ void input_move_pointer(double dx, double dy)
 }
 void input_set_buttons(int buttons)
 {
-    if ((buttons & ~ptr_buttons) && cdfm_busy() && os9_cycles() - last_read > ll_cpu_hz &&
+    if ((buttons & ~ptr_buttons) && cdfm_skippable() && os9_cycles() - last_read > ll_cpu_hz &&
         os9_process_alive("cdi_space") && !os9_process_alive("cdi_tribes"))
         cdfm_skip();
     ptr_buttons = buttons;

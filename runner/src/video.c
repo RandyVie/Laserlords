@@ -88,6 +88,7 @@ static Mcd vd;
 static struct { bool on; int x, y; uint16_t pat[16]; uint32_t color; } cursor;
 
 uint32_t ll_frame[VIDEO_H][VIDEO_W];  /* ARGB, 768 x 280 */
+#define  ACTIVE_END 260
 int      video_debug_field = -1;
 bool     video_trace_fields;           /* debug: mark every field in the trace (LL_TRACE_FIELDS=1) */       /* debug: log per-line state for this field */
 int      ll_frame_count;
@@ -352,6 +353,7 @@ int video_field(void)
     line_event_requests = 0;
     if (video_trace_fields) ll_log("        -- field %d\n", ll_frame_count);
     int cur[2] = { -1, -1 }, line[2] = { 0, 0 };
+    bool ended[2] = { false, false };
     for (int p = 0; p < 2; p++) {
         vd.stopped[p] = false;
         vd.first_vsr[p] = 0;
@@ -373,7 +375,7 @@ int video_field(void)
         for (int p = 0; p < 2; p++) {
             if (cur[p] < 0) continue;
             Table *l = &lcts[cur[p]];
-            if (!l->used || line[p] >= l->count) { cur[p] = -1; continue; }
+            if (!l->used || line[p] >= l->count) { cur[p] = -1; ended[p] = true; continue; }
             if (ll_frame_count == video_debug_field) {
                 bool any = false;
                 for (int c = 0; c < LCT_COLS; c++) any |= (l->ins[line[p] * LCT_COLS + c] >> 28) != 1;
@@ -390,8 +392,14 @@ int video_field(void)
             in_lct = false;
             int jt = l->jump_tab[line[p]], jl = l->jump_line[line[p]];
             if (jt >= 0 && !(jt == cur[p] && jl == line[p])) { cur[p] = jt; line[p] = jl; }
-            else if (jt == cur[p] && jl == line[p]) cur[p] = -1;     /* self link: end of table */
+            else if (jt == cur[p] && jl == line[p]) cur[p] = -1;   /* self link: the line repeats, picture data keeps streaming */
             else line[p]++;
+        }
+        /* The active picture is 240 lines from row 20 (MAME, real ROM: black from row 260 on every
+         * screen); below it the planes would show whatever memory follows their pictures. */
+        if (y >= ACTIVE_END) {
+            for (int x = 0; x < VIDEO_W; x++) ll_frame[y][x] = 0xFF000000;
+            continue;
         }
         if (exec_fct[0] < 0 && exec_fct[1] < 0) {
             for (int x = 0; x < VIDEO_W; x++) ll_frame[y][x] = 0xFF000000;
@@ -404,6 +412,10 @@ int video_field(void)
         matte_line();
         decode_line(0, pa, ta);
         decode_line(1, pb, tb);
+        /* past the end of its line table a plane shows nothing (black on the real machine below
+         * the planet scenes, instead of whatever memory follows the last picture line) */
+        if (ended[0]) for (int x = 0; x < VIDEO_W; x++) ta[x] = true;
+        if (ended[1]) for (int x = 0; x < VIDEO_W; x++) tb[x] = true;
         mix_line(pa, ta, pb, tb, ll_frame[y]);
         draw_cursor(y, ll_frame[y]);
     }
@@ -442,7 +454,8 @@ int video_setstt(int code, uint32_t *d0)
     ll_log("        dc %02x: d3=%x d4=%x d5=%x d6=%x d7=%x a0=%06x\n", sub, d3 & 0xFFFF, d4 & 0xFFFF, d5, d6, d7 & 0xFFFF, a0);
     switch (sub) {
     case 0x00: case 0x06: {   /* dc_crfct / dc_crlct (plane, size) -> id */
-        int i = tab_create(sub == 6, d3 & 0xFFFF, d4 & 0xFFFF);
+        /* an LCT's size is in frame lines: two per table row (see the line-number note below) */
+        int i = tab_create(sub == 6, d3 & 0xFFFF, sub == 6 ? (d4 & 0xFFFF) / 2 : (d4 & 0xFFFF));
         if (i < 0) return E_MEMFUL;
         *d0 = (uint32_t)i;
         ll_log("        video: create %s plane %d size %d -> id %d\n", sub ? "LCT" : "FCT", d3 & 1, d4 & 0xFFFF, i);
@@ -466,17 +479,27 @@ int video_setstt(int code, uint32_t *d0)
         os9_charge(ll_ucm_entry);
         t->ins[d4 & 0xFFFF] = d5;
         return 0;
-    case 0x0A:                /* dc_wrli (lct, line, column, instruction) */
-        if (!(t = lct(d3)) || (d4 & 0xFFFF) >= (uint32_t)t->count) return E_BPNUM;
+    /* Line numbers: the ROM's UCM has two address helpers (video driver +0x4a82 / +0x4c6c). Block
+     * reads and writes (0x1b, 0x1c) count table rows; everything else (0x07, 0x08, 0x0a, 0x0c,
+     * 0x0d, 0x10) takes frame lines and uses row = line / 2 (odd lines go to the second field's
+     * half of an interlaced table; Laser Lords' tables aren't interlaced). With rows everywhere,
+     * the planet's double-buffered scroll (LCT 0 rows 14+ vs LCT 6 linked from line 26) jumped
+     * 13 lines every other frame, and LCT 6's link back (line 320 -> LCT 0 line 350) missed the
+     * menu bar at row 175. */
+    case 0x0A: {              /* dc_wrli (lct, line, column, instruction) */
+        int row = (d4 & 0xFFFF) >> 1;
+        if (!(t = lct(d3)) || row >= t->count) return E_BPNUM;
         os9_charge(ll_ucm_entry);
-        t->ins[(d4 & 0xFFFF) * LCT_COLS + (d5 & 7)] = d6;
-        if ((d5 & 7) == 7) t->jump_tab[d4 & 0xFFFF] = -1;   /* column 7 held the link */
+        t->ins[row * LCT_COLS + (d5 & 7)] = d6;
+        if ((d5 & 7) == 7) t->jump_tab[row] = -1;   /* column 7 held the link */
         return 0;
+    }
     case 0x07: case 0x08: case 0x1B: case 0x1C: case 0x10: {
         /* LCT blocks (lct, line, column, lines, columns, buf): 0x1b read, 0x1c write,
          * 0x10 fill with NOP (no buffer). 7/8 unknown read/write variants (verify). */
         if (!(t = lct(d3))) return E_BPNUM;
         int l0 = d4 & 0xFFFF, c0 = d5 & 0xFFFF, nl = d6 & 0xFFFF, nc = d7 & 0xFFFF, k = 0;
+        if (sub != 0x1B && sub != 0x1C) l0 >>= 1;   /* starting frame line -> row; the count is rows */
         os9_charge(ll_ucm_entry * nl * nc);
         for (int l = l0; l < l0 + nl && l < t->count; l++)
             for (int c = c0; c < c0 + nc && c < LCT_COLS; c++, k++) {
@@ -494,7 +517,7 @@ int video_setstt(int code, uint32_t *d0)
     case 0x0C:                /* dc_flnk (fct, lct, line) (verify) */
         if (!(t = fct(d3))) return E_BPNUM;
         t->link_tab = lct(d4) ? (int)(d4 & 0xFFFF) : -1;
-        t->link_line = d5 & 0xFFFF;
+        t->link_line = (d5 & 0xFFFF) >> 1;
         ll_log("        video: FCT %d -> LCT %d line %d\n", d3 & 0xFFFF, d4 & 0xFFFF, d5 & 0xFFFF);
         return 0;
     case 0x0D:                /* dc_llnk (lct, line, lct2, line2) */
@@ -503,10 +526,13 @@ int video_setstt(int code, uint32_t *d0)
          * cdi_tribes relies on this: it rewrites column 7 of lines 14-173 to scroll, which drops the
          * split-screen link, and re-links when it wants it (the conversation menu bar at line 175
          * only shows without the link). */
-        if (!(t = lct(d3)) || (d4 & 0xFFFF) >= (uint32_t)t->count) return E_BPNUM;
-        t->ins[(d4 & 0xFFFF) * LCT_COLS + 7] = 0x10000000;
-        t->jump_tab[d4 & 0xFFFF] = (int16_t)(lct(d5) ? (int)(d5 & 0xFFFF) : -1);
-        t->jump_line[d4 & 0xFFFF] = (int16_t)(d6 & 0xFFFF);
+        {
+            int row = (d4 & 0xFFFF) >> 1, row2 = (d6 & 0xFFFF) >> 1;
+            if (!(t = lct(d3)) || row >= t->count) return E_BPNUM;
+            t->ins[row * LCT_COLS + 7] = 0x10000000;
+            t->jump_tab[row] = (int16_t)(lct(d5) ? (int)(d5 & 0xFFFF) : -1);
+            t->jump_line[row] = (int16_t)row2;
+        }
         return 0;
     case 0x0E:                /* dc_exec (fct plane A, fct plane B) */
         exec_fct[0] = fct(d3) ? (int)(d3 & 0xFFFF) : -1;

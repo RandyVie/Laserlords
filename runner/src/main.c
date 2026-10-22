@@ -22,9 +22,9 @@ static void usage(void)
         "usage: laserlords [options] [disc.chd | disc.cue | disc.bin]\n"
         "  (no disc: the last one used, or a file dialog)\n"
         "  --fullscreen        start fullscreen (F11 / Alt+Enter / Cmd+F toggle, F2 cycles scaling,\n"
-        "                      F3 toggles the top-border crop, F1 shows the controls)\n"
-        "  --accurate          no cosmetic fixes (show the warp-crossfade panel noise and the black\n"
-        "                      top border as the game draws them)\n"
+        "                      F3 toggles the border crop, F1 shows the controls)\n"
+        "  --accurate          no cosmetic fixes (show the warp-crossfade panel noise and the\n"
+        "                      borders as the game draws them)\n"
         "  --headless          no window; run for --seconds of emulated time\n"
         "  --seconds N         emulated run time when headless (default 60)\n"
         "  --shots DIR:N       save every Nth field as DIR/fNNNNN.png\n"
@@ -168,13 +168,15 @@ static SDL_AudioStream *aud;
 static int big_k, big_h;
 static char scale_mode[16] = "sharp";
 
-/* Top-border crop: on PAL the game starts its 240-line pictures at line 40 and leaves lines 0-39
- * black (a TV's overscan hid part of that), so those lines are cut, except while the opening
- * logo, the only thing drawn there, plays. F3 or crop_top=0 (or --accurate) shows them. */
-#define CROP_LINES 40
+/* Border crop: the game's pictures are 240 lines (rows 20-259 of the 280-line field); rows 0-19
+ * are black and rows 260+ lie below the active picture. Both bands are cut, except that the
+ * opening logo, which draws from row 0, keeps the top band. F3 or crop_top=0 (or --accurate)
+ * shows the whole field. */
+#define CROP_LINES 20
 bool crop_top = true;
 
 static int top_lines(void) { return crop_top && !os9_process_alive("cdi_bumperanim") ? CROP_LINES : 0; }
+static int bottom_lines(void) { return crop_top ? CROP_LINES : 0; }
 
 static const char help_text[] =
     "Move the pointer: mouse (click in the window to capture it, Esc releases it), "
@@ -184,7 +186,7 @@ static const char help_text[] =
     "Point at the words at the bottom of the screen (Beamdown, Hyperspace, Computer) "
     "and press button 1 to choose them.\n\n"
     "Skip a cutscene: press button 1.\n\n"
-    "F1: this help    F11 or Cmd+Enter: fullscreen    F2: scaling    F3: top border\n"
+    "F1: this help    F11 or Cmd+Enter: fullscreen    F2: scaling    F3: borders\n"
     "F4: slow the planets down (100% = original CD-i pace, 70%, 50%)\n"
     "Cmd+Q / Ctrl+Q: quit";
 
@@ -217,7 +219,7 @@ static bool window_init(bool fullscreen)
         return false;
     }
     SDL_SetHint(SDL_HINT_APP_NAME, "Laser Lords");
-    int out_h = crop_top ? OUT_H * (VIDEO_H - CROP_LINES) / VIDEO_H : OUT_H;
+    int out_h = crop_top ? OUT_H * (VIDEO_H - 2 * CROP_LINES) / VIDEO_H : OUT_H;
     if (!SDL_CreateWindowAndRenderer("Laser Lords  (F1: controls)", OUT_W * 3 / 2, out_h * 3 / 2,
                                      SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY, &win, &ren)) {
         fprintf(stderr, "SDL window: %s\n", SDL_GetError());
@@ -262,8 +264,8 @@ static void present(void)
     SDL_UpdateTexture(tex, NULL, ll_frame, VIDEO_W * 4);
     SDL_SetRenderDrawColor(ren, 0, 0, 0, 255);
     SDL_RenderClear(ren);
-    int top = top_lines(), out_h = OUT_H * (VIDEO_H - top) / VIDEO_H;
-    SDL_FRect src = { 0, (float)top, VIDEO_W, (float)(VIDEO_H - top) };
+    int top = top_lines(), shown = VIDEO_H - top - bottom_lines(), out_h = OUT_H * shown / VIDEO_H;
+    SDL_FRect src = { 0, (float)top, VIDEO_W, (float)shown };
     SDL_FRect dst = fit_rect(out_h);
     if (!strcmp(scale_mode, "sharp")) {
         /* pass 1: integer nearest upscale into an offscreen texture; pass 2: smooth fit */
