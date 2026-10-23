@@ -34,6 +34,8 @@ static void usage(void)
         "  --wav FILE          headless: write the audio output to a WAV file\n"
         "  --replay FILE       headless: replay a recorded session (the window records every session\n"
         "                      to session.llrec in the data folder; the previous one is session-1.llrec)\n"
+        "  --record FILE       record this session's input (the window always writes session.llrec)\n"
+        "  --debug-field N     debug: log the display program and per-line plane state for field N\n"
         "  --nvram DIR         host folder backing /nvr (default: per-user data folder)\n"
         "  --cpu-mhz N         emulated CPU clock (default 15)\n"
         "  --speed N           planet pace in percent, 25-100 (default 100 = original CD-i pace;\n"

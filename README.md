@@ -75,9 +75,12 @@ Release packages go into `dist/`:
 
 ## Developer tools
 
+See **[GUIDE_NEW_GAME.md](GUIDE_NEW_GAME.md)** for the full workflow (porting another CD-i game, comparing with MAME, debugging recipes, verified CD-i facts).
+
+
 - `--headless --seconds N --shots DIR:N --wav FILE --trace FILE`: run without a window, dump frames, audio and a full system-call trace.
 - `--input T:b1`, `T:m:DX,DY`, `T:s:SX,SY,DUR`: scripted input for headless runs.
-- `tools/`: disc extraction (`cdi.py`), module info, disassembler, syscall catalogue, Ghidra C decompilation (`decompile.sh` → `out/c/`), offline image decoders.
+- `tools/`: disc extraction (`cdi.py`), module info, disassembler, syscall catalogue, Ghidra C decompilation (`decompile.sh` → `out/c/`), offline image decoders, MAME reference scripts (`tools/mame/`), CD-i ROM inspection (`tools/rom/`), frame and audio measurement (`frames.py`, `audio_rms.py`), session-to-MAME conversion (`llrec_to_route.py`).
 
 ## Third-party code
 
