@@ -15,5 +15,13 @@ cmake --build "$BUILD" -j --target LaserLordsApp
 mkdir -p dist
 rm -rf dist/LaserLords.app dist/LaserLords-macOS.dmg
 cp -R "$BUILD/LaserLords.app" dist/
-hdiutil create -quiet -volname "Laser Lords" -srcfolder dist/LaserLords.app -ov -format UDZO dist/LaserLords-macOS.dmg
+# disk image: the app, an Applications shortcut to drag it onto, the read-me and the licences
+stage=$(mktemp -d)
+cp -R dist/LaserLords.app "$stage/"
+ln -s /Applications "$stage/Applications"
+cp packaging/READ_ME_FIRST.txt "$stage/READ ME FIRST.txt"
+cp LICENSE "$stage/LICENSE.txt"
+cp THIRD_PARTY_NOTICES.md "$stage/THIRD_PARTY_NOTICES.md"
+hdiutil create -quiet -volname "Laser Lords" -srcfolder "$stage" -ov -format UDZO dist/LaserLords-macOS.dmg
+rm -rf "$stage"
 echo "dist/LaserLords.app and dist/LaserLords-macOS.dmg"
