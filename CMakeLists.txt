@@ -9,14 +9,16 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # (-DLL_BUNDLED_SDL=ON, or automatically when none is installed). Static SDL makes the
 # Linux / Steam Deck and Windows builds self-contained.
 option(LL_BUNDLED_SDL "Build SDL3 from source and link it statically" OFF)
-if(NOT LL_BUNDLED_SDL)
+if(NINTENDO_SWITCH)
+    # Switch homebrew (devkitPro toolchain): SDL2 from the portlibs, see the Switch section below
+elseif(NOT LL_BUNDLED_SDL)
     find_package(SDL3 CONFIG QUIET)
     if(NOT SDL3_FOUND)
         message(STATUS "SDL3 not found: building it from source")
         set(LL_BUNDLED_SDL ON)
     endif()
 endif()
-if(LL_BUNDLED_SDL)
+if(LL_BUNDLED_SDL AND NOT NINTENDO_SWITCH)
     include(FetchContent)
     set(SDL_SHARED OFF CACHE BOOL "" FORCE)
     set(SDL_STATIC ON CACHE BOOL "" FORCE)
@@ -30,7 +32,7 @@ if(LL_BUNDLED_SDL)
         ${LL_FETCH_OPTS})
     FetchContent_MakeAvailable(SDL3)
     set(LL_SDL SDL3::SDL3-static)
-else()
+elseif(NOT NINTENDO_SWITCH)
     set(LL_SDL SDL3::SDL3)
 endif()
 
@@ -74,6 +76,19 @@ add_library(llcore STATIC
     runner/src/disc.c runner/src/mem.c runner/src/log.c runner/src/video.c runner/src/cdfm.c runner/src/audio.c runner/src/input.c runner/src/soundmap.c)
 target_include_directories(llcore PUBLIC runner/src)
 target_link_libraries(llcore PUBLIC musashi chdr-static)
+
+if(NINTENDO_SWITCH)
+    # Nintendo Switch homebrew: laserlords.nro (libnx + SDL2), started from the Homebrew Menu.
+    # Built in devkitPro's Docker image by scripts/build-switch.sh.
+    find_package(SDL2 CONFIG REQUIRED)
+    add_executable(laserlords_switch runner/src/switch/main_switch.c runner/src/settings.c)
+    target_link_libraries(laserlords_switch PRIVATE llcore SDL2::SDL2-static)
+    target_compile_options(laserlords_switch PRIVATE -Wall -Wextra)
+    target_compile_options(llcore PRIVATE -Wall -Wextra)
+    nx_generate_nacp(OUTPUT laserlords.nacp NAME "Laser Lords" AUTHOR "CD-i runner" VERSION "${PROJECT_VERSION}")
+    nx_create_nro(laserlords_switch OUTPUT laserlords.nro ICON ${CMAKE_SOURCE_DIR}/packaging/switch/icon.jpg NACP laserlords.nacp)
+    return()
+endif()
 
 add_executable(laserlords runner/src/main.c runner/src/settings.c)
 target_link_libraries(laserlords PRIVATE llcore ${LL_SDL})

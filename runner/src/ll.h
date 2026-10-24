@@ -162,6 +162,7 @@ void audio_wav_close(void);
 /* ---- settings (settings.c) ---- */
 const char *settings_get(const char *key, const char *def);
 void settings_set(const char *key, const char *val);
+void settings_set_dir(const char *dir);
 
 /* ---- video (video.c) ---- */
 #define VIDEO_W 768                 /* MCD212 pixel units per line (normal res = 2 units/pixel) */

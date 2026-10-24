@@ -66,12 +66,23 @@ Release packages go into `dist/`:
 | macOS app + dmg | `scripts/build-macos.sh` (`UNIVERSAL=1` for Intel + Apple Silicon) | `dist/LaserLords.app`, `dist/LaserLords-macOS.dmg` |
 | Linux x86_64 / Steam Deck | `scripts/build-linux.sh` (needs Docker) | `dist/LaserLords-linux-x86_64.tar.gz` |
 | Windows x86_64 | `scripts/build-windows.sh` (needs `mingw-w64`) | `dist/windows/LaserLords.exe` |
+| Nintendo Switch (homebrew) | `scripts/build-switch.sh` (needs Docker; devkitPro image) | `dist/switch/laserlords.nro` |
 
 ### Steam Deck
 
 1. Copy `laserlords` and your disc image to the Deck, for example `~/Games/LaserLords/`.
 2. In Desktop Mode, add `laserlords` to Steam as a non-Steam game, with the disc as its launch option: `"/home/deck/Games/LaserLords/Laser Lords (Europe).chd"`. The file dialog doesn't work in Gaming Mode, so give the path once; it's remembered.
 3. It starts fullscreen in Gaming Mode. The Deck's controls arrive as a standard gamepad (stick/D-pad + A/B).
+
+### Nintendo Switch (homebrew)
+
+For a Switch running custom firmware (Atmosphère) with the Homebrew Menu:
+
+1. Copy `laserlords.nro` and your own disc image (`.chd`, or `.cue` + `.bin`) to `sdmc:/switch/laserlords/` on the SD card.
+2. Start it from the Homebrew Menu (open the Album). Controls: left stick / D-pad move, A = button 1, B = button 2, − = border crop, + = quit.
+3. Saves, settings and the session recording (`session.llrec`, for bug reports) are written to the same folder.
+
+For quick testing, the Homebrew Menu's netloader (press Y) accepts builds over Wi-Fi: `nxlink -s dist/switch/laserlords.nro` (with `-s`, the app's log appears in the terminal).
 
 ## Developer tools
 

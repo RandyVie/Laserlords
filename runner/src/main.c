@@ -404,6 +404,11 @@ static int run_window(void)
 
 int main(int argc, char **argv)
 {
+    {   /* settings live in the per-user data folder (SDL_GetPrefPath works before SDL_Init) */
+        char *pref = SDL_GetPrefPath("LaserLords", "LaserLords");
+        settings_set_dir(pref);
+        SDL_free(pref);
+    }
     const char *disc = NULL, *boot = "cdi_launcher";
     double seconds = 60;
     bool headless = false, fullscreen = false, accurate = false, speed_set = false;

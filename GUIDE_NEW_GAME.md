@@ -328,6 +328,11 @@ into a per-game profile):
 - Test with `build/LaserLords.app`; package only for distribution.
 - `UNIVERSAL=1 scripts/build-macos.sh` (signed universal app + dmg), `scripts/build-windows.sh`
   (MinGW), `scripts/build-linux.sh` (Docker, Ubuntu 22.04 x86_64; tests run in the container).
+- Nintendo Switch homebrew: `scripts/build-switch.sh` builds `dist/switch/laserlords.nro` in
+  devkitPro's Docker image (`devkitpro/devkita64`, amd64, has SDL2 but no SDL3). The front end is
+  `runner/src/switch/main_switch.c` (libnx for Joy-Cons, SD paths and text screens; SDL2 for
+  picture and sound); the core is shared. Files live in `sdmc:/switch/laserlords/`. Test on the
+  device with the Homebrew Menu's netloader: `nxlink -s dist/switch/laserlords.nro`.
 - Docker Desktop sometimes hangs on start: wait with a timeout (`for i in $(seq 1 60)`), and if
   it doesn't come up, force-quit it and start again. Quit it when done.
 - Background builds outlive later edits: note the commit a build started from, and stop stale

@@ -1,6 +1,6 @@
-/* Persistent settings: key=value lines in <pref path>/settings.txt. */
+/* Persistent settings: key=value lines in <data folder>/settings.txt. The front end names the
+ * folder (settings_set_dir) before the first use. */
 #include "ll.h"
-#include <SDL3/SDL.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -8,13 +8,17 @@
 static char keys[MAXSET][32], vals[MAXSET][1024];
 static int nset;
 static char file[1024];
+static char dir[1024];
+static bool loaded;
+
+/* dir ends with a path separator (or is empty for the working directory) */
+void settings_set_dir(const char *d) { snprintf(dir, sizeof dir, "%s", d ? d : ""); }
 
 static void load(void)
 {
-    if (file[0]) return;
-    char *pref = SDL_GetPrefPath("LaserLords", "LaserLords");
-    snprintf(file, sizeof file, "%ssettings.txt", pref ? pref : "");
-    SDL_free(pref);
+    if (loaded) return;
+    loaded = true;
+    snprintf(file, sizeof file, "%ssettings.txt", dir);
     FILE *f = fopen(file, "r");
     if (!f) return;
     char line[1100];
