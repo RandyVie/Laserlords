@@ -1,13 +1,13 @@
 # Laser Lords: native runner
 
-## ⬇️ Download (v0.8.0 preview)
+## ⬇️ Download (v0.8.1 preview)
 
 | System | Download |
 |---|---|
-| macOS 11+ (Intel and Apple Silicon) | [LaserLords-0.8.0-macOS.dmg](https://github.com/RandyVie/Laserlords/releases/download/v0.8.0/LaserLords-0.8.0-macOS.dmg) |
-| Windows 10/11 (64-bit) | [LaserLords-0.8.0-windows-x64.zip](https://github.com/RandyVie/Laserlords/releases/download/v0.8.0/LaserLords-0.8.0-windows-x64.zip) |
-| Linux x86_64 / Steam Deck | [LaserLords-0.8.0-linux-x86_64.tar.gz](https://github.com/RandyVie/Laserlords/releases/download/v0.8.0/LaserLords-0.8.0-linux-x86_64.tar.gz) |
-| Nintendo Switch (homebrew) | [LaserLords-0.8.0-switch.zip](https://github.com/RandyVie/Laserlords/releases/download/v0.8.0/LaserLords-0.8.0-switch.zip) |
+| macOS 11+ (Intel and Apple Silicon) | [LaserLords-0.8.1-macOS.dmg](https://github.com/RandyVie/Laserlords/releases/download/v0.8.1/LaserLords-0.8.1-macOS.dmg) |
+| Windows 10/11 (64-bit) | [LaserLords-0.8.1-windows-x64.zip](https://github.com/RandyVie/Laserlords/releases/download/v0.8.1/LaserLords-0.8.1-windows-x64.zip) |
+| Linux x86_64 / Steam Deck | [LaserLords-0.8.1-linux-x86_64.tar.gz](https://github.com/RandyVie/Laserlords/releases/download/v0.8.1/LaserLords-0.8.1-linux-x86_64.tar.gz) |
+| Nintendo Switch (homebrew) | [LaserLords-0.8.1-switch.zip](https://github.com/RandyVie/Laserlords/releases/download/v0.8.1/LaserLords-0.8.1-switch.zip) |
 
 Release notes, checksums and older versions: [all releases](https://github.com/RandyVie/Laserlords/releases). You need your own Laser Lords disc image; see [Download and play](#download-and-play) for how to start each version.
 
