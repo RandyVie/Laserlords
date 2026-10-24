@@ -25,10 +25,9 @@ Controls
   F1 help, F2 scaling, F3 borders, F4 slower planets, F11 or Cmd/Ctrl+Enter fullscreen,
   Cmd/Ctrl+Q quit.   Switch: - = borders, + = quit.
 
-Bugs
-  This is a preview: the start of the game is tested, the rest not yet. Each session
-  records your input to session.llrec in the data folder. Reproduce the problem, quit,
-  and attach that file to an issue at https://github.com/RandyVie/Laserlords/issues
+Status
+  This is a preview: all planets have been visited, but the game hasn't been tested
+  extensively yet. The app records nothing about you and has no internet access.
 
 Disclaimer
   Unofficial fan project, not affiliated with Philips, Spinnaker Software, American

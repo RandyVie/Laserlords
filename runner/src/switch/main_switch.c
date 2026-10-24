@@ -3,7 +3,8 @@
  * Joy-Cons, SD card paths and text screens, SDL2 for the picture and sound.
  *
  * Files live in sdmc:/switch/laserlords/: put the disc image there (.chd, or .cue + .bin).
- * Settings, saves (nvram/) and the session recording (session.llrec) are written there too.
+ * Settings and saves (nvram/) are written there too; with record_session=1 in settings.txt the
+ * session's input is also recorded to session.llrec (off by default).
  *
  * Controls: left stick / D-pad move, A = button 1, B = button 2 (Y and X work too), + quits,
  * - toggles the border crop. */
@@ -145,9 +146,11 @@ int main(int argc, char **argv)
     if (!strcmp(settings_get("fix_crossfade", "1"), "0")) video_fix_crossfade = false;
     ll_game_speed = atoi(settings_get("planet_pace", "100"));
     io_set_nvram_dir(DIR_PATH "nvram");
-    remove(DIR_PATH "session-1.llrec");
-    rename(DIR_PATH "session.llrec", DIR_PATH "session-1.llrec");
-    input_record_open(DIR_PATH "session.llrec", ll_game_speed);
+    if (!strcmp(settings_get("record_session", "0"), "1")) {   /* opt-in, for bug hunting */
+        remove(DIR_PATH "session-1.llrec");
+        rename(DIR_PATH "session.llrec", DIR_PATH "session-1.llrec");
+        input_record_open(DIR_PATH "session.llrec", ll_game_speed);
+    }
 
     mem_init();
     cpu_init();

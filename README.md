@@ -17,7 +17,7 @@ The game's original 68000 code runs unchanged on an embedded CPU core (Musashi).
 
 **You need your own disc image.** No game data is included or ever committed. Use a MAME CHD (`.chd`), or `.cue`/`.bin` from `chdman extractcd`.
 
-> **Status: preview.** The intro, the first planet (Luxor), walking, conversations, sound, saving and loading are tested and match the real CD-i (checked against MAME running the original ROM). The rest of the game has not been played through yet, so expect bugs further in; please report them (see [Reporting bugs](#reporting-bugs)). Tested on macOS and on a Nintendo Switch; the Windows and Linux builds pass the tests but haven't been tried on real machines yet.
+> **Status: preview.** The intro, walking, conversations, sound, saving and loading match the real CD-i (checked against MAME running the original ROM), and all planets have been visited, but the game hasn't been tested extensively yet. Played on macOS and on a Nintendo Switch; the Windows and Linux builds pass the tests but haven't been tried on real machines yet.
 
 ## Disclaimer
 
@@ -76,8 +76,6 @@ The intro takes about 2½ minutes, and the original only lets you skip it during
 
 **Original pace:** timing is calibrated against the real CD-i (MAME running the original ROM): the intro's images and fades and the warrior's walking speed match it. F4 can slow the planets down further (70%, 50%); it is remembered as `planet_pace` in `settings.txt`.
 
-**Bug reports:** every session in the window (and on the Switch) records its input to `session.llrec` in the data folder (the previous session is kept as `session-1.llrec`). `laserlords --headless --replay session.llrec --seconds N "disc.chd"` plays the same session again exactly, so a problem can be reproduced and traced.
-
 There is no arrow cursor, as on the original: on the orbit screen the blinking word is the current choice (move left / right to change it), and on the planets the pointer works as a joystick.
 
 **Cosmetic fixes (on by default):**
@@ -117,13 +115,9 @@ For a Switch running custom firmware (Atmosphère) with the Homebrew Menu:
 
 1. Copy `laserlords.nro` and your own disc image (`.chd`, or `.cue` + `.bin`) to `sdmc:/switch/laserlords/` on the SD card.
 2. Start it from the Homebrew Menu (open the Album). Controls: left stick / D-pad move, A = button 1, B = button 2, − = border crop, + = quit.
-3. Saves, settings and the session recording (`session.llrec`, for bug reports) are written to the same folder.
+3. Saves and settings are written to the same folder.
 
 For quick testing, the Homebrew Menu's netloader (press Y) accepts builds over Wi-Fi: `nxlink -s dist/switch/laserlords.nro` (with `-s`, the app's log appears in the terminal).
-
-## Reporting bugs
-
-Open an [issue](https://github.com/RandyVie/Laserlords/issues) and describe what you did and what went wrong. Every session records your input (not the game) to `session.llrec` in the data folder (on the Switch: `sdmc:/switch/laserlords/`). Reproduce the problem, quit, and attach that file: with it the session can be replayed exactly and the bug found quickly.
 
 ## Developer tools
 
@@ -131,7 +125,7 @@ See **[GUIDE_NEW_GAME.md](GUIDE_NEW_GAME.md)** for the full workflow (porting an
 
 - `--headless --seconds N --shots DIR:N --wav FILE --trace FILE`: run without a window, dump frames, audio and a full system-call trace.
 - `--input T:b1`, `T:m:DX,DY`, `T:s:SX,SY,DUR`: scripted input for headless runs.
-- `--record FILE` / `--replay FILE`: record or replay input exactly; `--debug-field N`: dump the display program for one field.
+- `--record FILE` / `--replay FILE`: record or replay input exactly; `--debug-field N`: dump the display program for one field. Input recording is off by default; `record_session=1` in `settings.txt` makes the app (also on the Switch) write `session.llrec` to the data folder, for tracking down a bug.
 - `tools/`: disc extraction (`cdi.py`), module info, disassembler, syscall catalogue, Ghidra C decompilation (`decompile.sh` → `out/c/`), offline image decoders, MAME reference scripts (`tools/mame/`), CD-i ROM inspection (`tools/rom/`), frame and audio measurement (`frames.py`, `audio_rms.py`), session-to-MAME conversion (`llrec_to_route.py`).
 
 ## Licence and third-party code

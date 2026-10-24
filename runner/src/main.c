@@ -32,9 +32,9 @@ static void usage(void)
         "  --input T:ACTION    headless input at T seconds: b1 / b2 / b3 (press), m:DX,DY (move),\n"
         "                      s:SX,SY,DUR (hold stick, -1..1, for DUR seconds)\n"
         "  --wav FILE          headless: write the audio output to a WAV file\n"
-        "  --replay FILE       headless: replay a recorded session (the window records every session\n"
-        "                      to session.llrec in the data folder; the previous one is session-1.llrec)\n"
-        "  --record FILE       record this session's input (the window always writes session.llrec)\n"
+        "  --replay FILE       headless: replay a recorded session\n"
+        "  --record FILE       record this session's input (off by default; record_session=1 in\n"
+        "                      settings.txt makes the window write session.llrec in the data folder)\n"
         "  --debug-field N     debug: log the display program and per-line plane state for field N\n"
         "  --nvram DIR         host folder backing /nvr (default: per-user data folder)\n"
         "  --cpu-mhz N         emulated CPU clock (default 15)\n"
@@ -520,7 +520,8 @@ opened:
         if (!speed_set) ll_game_speed = sp;
     }
     if (record_path) input_record_open(record_path, ll_game_speed);
-    else if (!headless) {   /* record this session's input; keep the previous one */
+    else if (!headless && !strcmp(settings_get("record_session", "0"), "1")) {
+        /* opt-in input recording for bug hunting (record_session=1); keeps the previous one */
         char *pref = SDL_GetPrefPath("LaserLords", "LaserLords");
         if (pref) {
             char cur[1024], old[1024];

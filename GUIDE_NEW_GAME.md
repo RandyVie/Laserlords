@@ -175,7 +175,7 @@ Runner options (`laserlords --help` prints the full list):
 | `--trace FILE` | Every system call, signal, PCL/PCB event, dc_* call, sound map, replay input |
 | `--debug-field N` | Dump the FCT/LCT instructions and per-line plane state (VSR, ICM, weights) for field N |
 | `--input T:b1`, `T:s:SX,SY,DUR`, `T:m:DX,DY` | Scripted input (button, stick held for DUR s, pointer move) |
-| `--record FILE` / `--replay FILE` | Record / replay input exactly (window sessions record automatically to `session.llrec` in the data folder; previous one kept as `session-1.llrec`) |
+| `--record FILE` / `--replay FILE` | Record / replay input exactly. Off by default in the window; `record_session=1` in settings.txt writes `session.llrec` (previous one kept as `session-1.llrec`) |
 | `--wav FILE` | Write the audio output |
 | `--speed N`, `--cpu-mhz N` | Game-clock factor (planets only), emulated CPU clock (for experiments) |
 | `--accurate` | Turn off cosmetic fixes |
@@ -276,8 +276,9 @@ Recipes:
 ## 9. Playbooks for typical symptoms
 
 **"It freezes when I do X"**
-1. Ask the player to reproduce it in the window, then quit. Copy `session.llrec` and the NVRAM
-   folder (to a scratch copy) from the data folder.
+1. Ask the player to turn on recording (`record_session=1` in settings.txt), reproduce it in the
+   window, then quit. Copy `session.llrec` and the NVRAM folder (to a scratch copy) from the
+   data folder. Recording is opt-in on purpose: users don't expect an app to log their input.
 2. `--replay` it headless with `--shots` and `LL_TRACE_FIELDS=1 --trace`; find the press
    (`replay: buttons`) and what the game does after it.
 3. No more system calls? `LL_PCHIST_FROM=<field>` gives the hot PCs; disassemble them
@@ -344,8 +345,9 @@ into a per-game profile):
 
 - They report symptoms in plain words ("super fast", "jumbled", "freezes when I talk"). Turn each
   into a measurement before changing code, and verify the fix the same way.
-- Ask early for a recording (play, reproduce, quit), not a route description; describing routes
-  in a platformer cost hours of blind scripted exploration.
+- Ask early for a recording (turn on `record_session=1`, play, reproduce, quit), not a route
+  description; describing routes in a platformer cost hours of blind scripted exploration.
+- Keep anything that records user input opt-in and documented; users don't expect it.
 - Reproduce, fix, re-verify against MAME, then tell them plainly what was wrong, what changed and
   what is not verified. Don't claim a fix you haven't reproduced.
 - Point them at `build/LaserLords.app` for testing; packages take a while.

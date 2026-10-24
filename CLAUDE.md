@@ -12,8 +12,9 @@ Rules:
 - Verify behaviour against the real CD-i instead of guessing: MAME with the user's BIOS
   (`tools/mame/`), the ROM itself (`tools/rom/`). Most bugs were a wrong unit or a missed side
   effect in the reimplementation.
-- For a reported bug, ask for a recording (play, reproduce, quit) and replay `session.llrec`
-  from the data folder headless (`--replay`), with a scratch copy of the NVRAM folder.
+- For a bug, have the user turn on input recording (`record_session=1` in settings.txt; off by
+  default), reproduce it and quit, then replay `session.llrec` from the data folder headless
+  (`--replay`) with a scratch copy of the NVRAM folder.
 - Cosmetic workarounds go behind a setting; `--accurate` turns them off.
 
 Build and test:

@@ -1,5 +1,11 @@
 # Laser Lords native runner: release notes
 
+## v0.8.1 (preview)
+
+- Input recording (`session.llrec`) is now off by default; nothing is recorded unless
+  `record_session=1` is set in `settings.txt` (a developer tool for tracking down bugs).
+- Read-me and README updated (no bug-report instructions; all planets visited).
+
 ## v0.8.0 (preview)
 
 First public preview. Plays the Philips CD-i game Laser Lords (1992) natively on macOS,
@@ -17,11 +23,8 @@ x86_64 (also Steam Deck), Nintendo Switch homebrew (.nro). Tested on macOS and a
 Windows and Linux builds pass the tests but haven't been run on real machines yet.
 
 **Known limitations**
-- Only the start of the game has been played through; later planets, combat and puzzles may
-  hit system features that aren't implemented yet.
+- All planets have been visited, but the game hasn't been tested extensively yet.
 - The macOS app isn't notarised and the Windows exe isn't signed: see READ ME FIRST for how
   to open them.
 - No graphics cursor on screen, as on the original (menus use a blinking highlight).
 
-**Reporting bugs:** attach `session.llrec` (your input only) to an issue; it replays the
-session exactly. See the README.
