@@ -30,4 +30,7 @@ docs "$tmp/switch/switch/laserlords"
 
 rm -rf "$tmp"
 (cd "$OUT" && shasum -a 256 LaserLords-* > SHA256SUMS.txt)
+
+# point the README's download links at this version (commit the README with the release)
+sed -i '' -E "s#(releases/download/)v[0-9.]+/LaserLords-[0-9.]+-#\1v$V/LaserLords-$V-#g; s#LaserLords-[0-9.]+-(macOS|windows|linux|switch)#LaserLords-$V-\1#g; s#Download \(v[0-9.]+#Download (v$V#" README.md
 ls -l "$OUT"

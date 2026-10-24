@@ -1,5 +1,16 @@
 # Laser Lords: native runner
 
+## ⬇️ Download (v0.8.0 preview)
+
+| System | Download |
+|---|---|
+| macOS 11+ (Intel and Apple Silicon) | [LaserLords-0.8.0-macOS.dmg](https://github.com/RandyVie/Laserlords/releases/download/v0.8.0/LaserLords-0.8.0-macOS.dmg) |
+| Windows 10/11 (64-bit) | [LaserLords-0.8.0-windows-x64.zip](https://github.com/RandyVie/Laserlords/releases/download/v0.8.0/LaserLords-0.8.0-windows-x64.zip) |
+| Linux x86_64 / Steam Deck | [LaserLords-0.8.0-linux-x86_64.tar.gz](https://github.com/RandyVie/Laserlords/releases/download/v0.8.0/LaserLords-0.8.0-linux-x86_64.tar.gz) |
+| Nintendo Switch (homebrew) | [LaserLords-0.8.0-switch.zip](https://github.com/RandyVie/Laserlords/releases/download/v0.8.0/LaserLords-0.8.0-switch.zip) |
+
+Release notes, checksums and older versions: [all releases](https://github.com/RandyVie/Laserlords/releases). You need your own Laser Lords disc image; see [Download and play](#download-and-play) for how to start each version.
+
 Plays **Laser Lords** (Spinnaker / AIM, Philips CD-i, 1992) natively on macOS, Linux (Steam Deck included), Windows and Nintendo Switch (homebrew), without a CD-i emulator or BIOS.
 
 The game's original 68000 code runs unchanged on an embedded CPU core (Musashi). The CD-i operating system (CD-RTOS / OS-9), the CD file manager, the MCD212 video chip and the ADPCM audio are reimplemented natively. See [NOTES.md](NOTES.md) for everything learned about the disc and the system.
